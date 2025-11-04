@@ -100,3 +100,23 @@ export const updateProfile = async (req, res) => {
     res.status(500).json({ message: 'Failed to update profile', error: err.message });
   }
 };
+
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+    const { rows } = await pool.query(
+      `SELECT id, username, email, role, avatar_url, updated_at 
+       FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User profile retrieved successfully', user: rows[0] });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to retrieve user profile', error: err.message });
+  }
+};
+
