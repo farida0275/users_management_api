@@ -1,10 +1,10 @@
 import pool from '../config/db.js';
 import cloudinary from '../config/cloudinary.js';
-import { getAllUsers, updateAvatar } from '../models/userModel.js';
+import { getAllUsers, updateAvatar, getUserById, deleteUser } from '../models/userModel.js';
 import streamifier from 'streamifier';
 
 export const getUsers = async (req, res) => {
-  const { rows } = await pool.query('SELECT id, username, email, role, avatar_url FROM users');
+  const { rows } = await pool.query('SELECT id, username, email, role, avatar_url, updated_at FROM users');
   res.json(rows);
 }; 
 
@@ -117,6 +117,21 @@ export const getUserProfile = async (req, res) => {
     res.json({ message: 'User profile retrieved successfully', user: rows[0] });
   } catch (err) {
     res.status(500).json({ message: 'Failed to retrieve user profile', error: err.message });
+  }
+};
+
+export const removeUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await deleteUser(id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User deleted successfully', user: deletedUser });
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to delete user', error: err.message });
   }
 };
 
